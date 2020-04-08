@@ -1,0 +1,81 @@
+---
+
+- name: Install unzip
+  apt:
+    pkg:
+      - unzip
+    state: latest
+    update_cache: yes
+  become: yes
+
+- name: Create temporary file
+  tempfile:
+    state: file
+  register: temporary_file
+
+- name: Delete temporary file
+  file:
+    path: "{{ temporary_file.path }}"
+    state: absent
+
+- name: Download artifacts, and save them in the temporary_file location
+  uri:
+    url: "{{ gitlab_api_base_url }}/{{ gitlab_project_id }}/jobs/artifacts/{{ gitlab_branch }}/download?job={{ gitlab_job_name }}"
+    method: GET
+    headers:
+      PRIVATE-TOKEN: "{{ gitlab_access_token }}"
+      JOB-TOKEN: $CI_JOB_TOKEN
+    dest: "{{ temporary_file.path }}"
+    force: yes
+    status_code:
+      - 200
+      - 304
+
+- name: Create a temporary directory
+  tempfile:
+    state: directory
+  register: temporary_directory
+
+- name: Unzip the artifacts file to the temporary directory
+  unarchive:
+    src: "{{ temporary_file.path }}"
+    dest: "{{ temporary_directory.path }}"
+    remote_src: yes
+
+- name: Copy the unzipped files to the webiste root directory
+  copy:
+    src: "{{ temporary_directory.path }}/build/"
+    dest: "{{ destination_dir_path }}"
+    remote_src: yes
+    group: "{{ destination_dir_group }}"
+    owner: "{{ destination_dir_owner }}"
+    mode: "{{ destination_dir_mode }}"
+    directory_mode: "{{ destination_dir_mode }}"
+    force: yes
+  become: yes
+
+- name: Find all the files in the destination directory
+  find:
+    path: "{{ destination_dir_path }}"
+    file_type: file
+    recurse: yes
+  register: find_result
+
+- name: Set all files to 0644
+  file:
+    path: "{{ item.path }}"
+    group: "{{ destination_files_group }}"
+    owner: "{{ destination_files_owner }}"
+    mode: "{{ destination_files_mode }}"
+  with_items: "{{ find_result.files }}"
+  becomes: yes
+
+- name: Delete the artifacts file
+  file:
+    path: "{{ temporary_file.path }}"
+    state: absent
+
+- name: Delete thr temporary directory
+  file:
+    path: "{{ temporary_directory.path }}"
+    state: absent

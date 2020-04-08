@@ -1,0 +1,34 @@
+---
+
+# https://docs.gitlab.com/ee/api/jobs.html#download-the-artifacts-archive
+
+# Gitlab API base URL
+gitlab_api_base_url: "https://www.gitlab.com/api/v4"
+
+# One of the following: REQUIRED
+# 1) Gitlab Access token with api scope.
+# 2) The value of $CI_JOB_TOKEN of the related pipeline job.
+gitlab_access_token: ""
+gitlab_job_token: ""
+
+# Project ID on Gitlab. REQUIRED
+gitlab_project_id: "0"
+
+# Branch name or tag that created the artifacts
+gitlab_branch: "master"
+
+# The name of the job that creates the artifacts on Gitlab
+gitlab_job_name: "Build"
+
+# Where to save the artifact files after unarchiving them. REQUIRED
+destination_dir_path: ""
+
+# Group, user and mode for the previous directory.
+destination_dir_group: "www-data"
+destination_dir_owner: "www-data"
+destination_dir_mode: "0755"
+
+# Group, user and mode for the previous directory.
+destination_files_group: "www-data"
+destination_files_owner: "www-data"
+destination_files_mode: "0644"
