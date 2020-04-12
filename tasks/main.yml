@@ -18,18 +18,31 @@
     path: "{{ temporary_file.path }}"
     state: absent
 
-- name: Download artifacts, and save them in the temporary_file location
+- name: Download artifacts, and save them in the temporary_file location (with JOB-TOKEN)
   uri:
-    url: "{{ gitlab_api_base_url }}/{{ gitlab_project_id }}/jobs/artifacts/{{ gitlab_branch }}/download?job={{ gitlab_job_name }}"
+    url: "{{ gitlab_api_base_url }}/projects/{{ gitlab_project_id }}/jobs/artifacts/{{ gitlab_branch }}/download?job={{ gitlab_job_name }}"
     method: GET
     headers:
-      PRIVATE-TOKEN: "{{ gitlab_private_token }}"
       JOB-TOKEN: "{{ gitlab_ci_job_token }}"
     dest: "{{ temporary_file.path }}"
     force: yes
     status_code:
       - 200
       - 304
+  when: gitlab_ci_job_token != ""
+
+- name: Download artifacts, and save them in the temporary_file location (with PRIVATE-TOKEN)
+  uri:
+    url: "{{ gitlab_api_base_url }}/projects/{{ gitlab_project_id }}/jobs/artifacts/{{ gitlab_branch }}/download?job={{ gitlab_job_name }}"
+    method: GET
+    headers:
+      PRIVATE-TOKEN: "{{ gitlab_private_token }}"
+    dest: "{{ temporary_file.path }}"
+    force: yes
+    status_code:
+      - 200
+      - 304
+  when: gitlab_private_token != ""
 
 - name: Create a temporary directory
   tempfile:
@@ -68,7 +81,7 @@
     owner: "{{ destination_files_owner }}"
     mode: "{{ destination_files_mode }}"
   with_items: "{{ find_result.files }}"
-  becomes: yes
+  become: yes
 
 - name: Delete the artifacts file
   file:
