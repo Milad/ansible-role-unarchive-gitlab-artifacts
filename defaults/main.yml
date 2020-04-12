@@ -6,10 +6,10 @@
 gitlab_api_base_url: "https://www.gitlab.com/api/v4"
 
 # One of the following: REQUIRED
-# 1) Gitlab Access token with api scope.
+# 1) Gitlab Access/Private token with api scope.
 # 2) The value of $CI_JOB_TOKEN of the related pipeline job.
-gitlab_access_token: ""
-gitlab_job_token: ""
+gitlab_private_token: ""
+gitlab_ci_job_token: ""
 
 # Project ID on Gitlab. REQUIRED
 gitlab_project_id: "0"

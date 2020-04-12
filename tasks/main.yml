@@ -23,8 +23,8 @@
     url: "{{ gitlab_api_base_url }}/{{ gitlab_project_id }}/jobs/artifacts/{{ gitlab_branch }}/download?job={{ gitlab_job_name }}"
     method: GET
     headers:
-      PRIVATE-TOKEN: "{{ gitlab_access_token }}"
-      JOB-TOKEN: $CI_JOB_TOKEN
+      PRIVATE-TOKEN: "{{ gitlab_private_token }}"
+      JOB-TOKEN: "{{ gitlab_ci_job_token }}"
     dest: "{{ temporary_file.path }}"
     force: yes
     status_code:
